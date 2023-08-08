@@ -1,16 +1,16 @@
 #!/usr/bin/python3
 import numpy as np
+
+
 class NumpyDemo(object):
 
     def __init__(self):
         self.type = 0
 
-
     def test(self):
         self.base_data_type()
         self.array_property()
         self.create_array()
-
 
     def base_data_type(self):
         print("---NumpyDemo base_data_type--- create")
@@ -23,7 +23,7 @@ class NumpyDemo(object):
         print(dt)
 
         #
-        dt = np.dtype([ ("age", np.int16)])
+        dt = np.dtype([("age", np.int16)])
         print(dt)
 
         dt = np.dtype([('age', np.int8)])
@@ -57,7 +57,7 @@ class NumpyDemo(object):
         print("b 维度：", b.ndim, "\nb:", b)
 
         print("b第一个深度层的所有元素", b[0, :, :])  # 获取第一个深度层的所有元素
-        print("b获取所有深度层和所有宽度上索引为 1 的元素" ,b[:, 1, :])  # 获取所有深度层和所有宽度上索引为 1 的元素
+        print("b获取所有深度层和所有宽度上索引为 1 的元素", b[:, 1, :])  # 获取所有深度层和所有宽度上索引为 1 的元素
         print("b获取所有深度层和所有高度、宽度上索引为 2 到 4 的元素", b[:, :, 2:4])  # 获取所有深度层和所有高度、宽度上索引为 2 到 4 的元素
 
         b = a.reshape(3, 4, 2)
@@ -96,9 +96,9 @@ class NumpyDemo(object):
 
         print("x:", x, "itemsize:", x.itemsize)
 
-        x = np.ones([3, 3], dtype =int)
+        x = np.ones([3, 3], dtype=int)
 
-        print("x:",x, "itemsize:", x.itemsize)
+        print("x:", x, "itemsize:", x.itemsize)
 
         # create 3*3 array
 
@@ -136,15 +136,15 @@ class NumpyDemo(object):
 
         # numpy.fromiter 方法从可迭代对象中建立 ndarray 对象，返回一维数组
         # 使用 range 函数创建列表对象
-        list = range(10)
-        it = iter(list)
+        mylist = range(10)
+        it = iter(mylist)
 
         # 使用迭代器创建 ndarray
-        x = np.fromiter(it, dtype = int )
+        x = np.fromiter(it, dtype=int)
         print("x:", x)
 
         # NumPy 从数值范围创建数组
-        x = np.arange(10, dtype = float)
+        x = np.arange(10, dtype=float)
         print("np.arange(10):", x)
 
         x = np.arange(1, 20, 2)
@@ -163,5 +163,5 @@ class NumpyDemo(object):
         x = np.linspace(10, 20, 5)
         print("np.linspace(10, 20, 5):", x)
 
-        x = np.linspace(10, 20, 5, endpoint = False)
+        x = np.linspace(10, 20, 5, endpoint=False)
         print("np.linspace(10, 20, 5,  endpoint = False):", x)

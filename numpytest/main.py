@@ -2,9 +2,11 @@
 
 from numpydemo import *
 
+
 def main():
-    numpyDemo = NumpyDemo()
-    numpyDemo.test()
+    numpy_demo = NumpyDemo()
+    numpy_demo.test()
+
 
 if __name__ == '__main__':
     main()
