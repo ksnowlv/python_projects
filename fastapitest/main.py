@@ -1,27 +1,19 @@
-
 import uvicorn
-from fastapi import FastAPI, APIRouter
-
+from fastapi import FastAPI
 from app.core import config
-
 from app.core.middleware import init_middleware
 from app.api.routers import init_routers
-from app.api.routers.user_routers import user_routers
-from app.api.routers.file_routers import file_routers
 
 
 def create_app():
+    # noinspection PyShadowingNames
     app = FastAPI(title=config.PROJECT_NAME, debug=config.DEBUG, version=config.VERSION)
     init_middleware(app)
-    api_routes = APIRouter()
-    api_routes.include_router(user_routers, prefix='/user')
-    api_routes.include_router(file_routers, prefix='/files')
-    app.include_router(api_routes)
-    #init_routers(app)
+    init_routers(app)
     return app
 
-app = create_app()
 
+app = create_app()
 
 
 # @app.middleware("http")
@@ -53,6 +45,7 @@ app = create_app()
 @app.get('/')
 async def root():
     return {'message': "Hello fastapitest!"}
+
 
 # main
 if __name__ == '__main__':
