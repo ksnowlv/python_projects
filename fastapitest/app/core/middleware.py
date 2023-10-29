@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.core.logging import LogMiddleware
+from app.core.xlogger import LogMiddleware
 
 from fastapi.middleware import Middleware
 

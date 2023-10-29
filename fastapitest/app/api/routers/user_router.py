@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from app.core.xlogger import xlogger
 
 
 class UserRouter(APIRouter):
@@ -8,6 +9,7 @@ class UserRouter(APIRouter):
         @self.get('/home')
         async def home():
             # return {'message': "Hello user"}
+            xlogger.info("home:")
             return self.handle_home_response("heom test")
 
         @self.post("/login_json")
