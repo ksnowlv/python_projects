@@ -1,14 +1,15 @@
 # 自定义的 Loguru 日志封装模块 xlogger.py
-from loguru import logger as xlogger
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-from starlette.types import ASGIApp, Message
-from fastapi import Request, Response
-import time
 import logging
-from starlette.concurrency import iterate_in_threadpool
+import time
+
+from fastapi import Response
+from loguru import logger as xlogger
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp
+
 
 class LogMiddleware(BaseHTTPMiddleware):
-    FILES_API = "/files/"
+    FILES_API = "/file/"
 
     def __init__(self, app: ASGIApp) -> None:
         super().__init__(app)
@@ -21,15 +22,15 @@ class LogMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         cur_time = time.time()
         xlogger.info(f"Request: {request.method} {request.url}")
-        xlogger.debug(f"Request Headers: {request.headers}")
-        query_params = dict(request.query_params)
-        xlogger.debug(f"Request query_params: {query_params}")
+        # xlogger.debug(f"Request Headers: {request.headers}")
+        # query_params = dict(request.query_params)
+        # xlogger.debug(f"Request query_params: {query_params}")
 
         if LogMiddleware.FILES_API in str(request.url):
             print(f"File API")
-        else:
-            body = await request.body()
-            xlogger.debug(f"Request Body: {body.decode('utf-8', 'ignore')}")
+        # else:
+        #     body = await request.body()
+        #     xlogger.debug(f"Request Body: {body.decode('utf-8', 'ignore')}")
 
         response: Response = await call_next(request)
 

@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from app.core.xlogger import LogMiddleware
 
-from fastapi.middleware import Middleware
+from app.core.xlogger import LogMiddleware
 
 
 def init_middleware(app: FastAPI):

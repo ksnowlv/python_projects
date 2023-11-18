@@ -3,12 +3,15 @@ from fastapi import FastAPI
 from app.core import config
 from app.core.middleware import init_middleware
 from app.api.routers import init_routers
+from app.db.database import *
 
 
 def create_app():
     # noinspection PyShadowingNames
     app = FastAPI(title=config.PROJECT_NAME, debug=config.DEBUG, version=config.VERSION)
     init_middleware(app)
+    init_db()
+
     init_routers(app)
     return app
 
