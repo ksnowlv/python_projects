@@ -13,7 +13,7 @@ from ..models.responsemodel import ResponseBaseModel
 router = APIRouter(
     prefix="/user",
     tags=["用户接口"],
-    responses={404: {"description": "Not found111"}},
+    responses={404: {"description": "Not found"}},
 )
 
 

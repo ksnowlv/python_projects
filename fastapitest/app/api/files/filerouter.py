@@ -13,7 +13,7 @@ from ...utils.md5utils import md5_by_data
 router = APIRouter(
     prefix="/file",
     tags=["文件操作接口"],
-    responses={404: {"description": "Not found111"}},
+    responses={404: {"description": "Not found"}},
 )
 
 

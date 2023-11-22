@@ -39,6 +39,5 @@ async def set_json_key_values(key: str, value: dict, redis=Depends(get_redis)):
 @router.post('/getKey')
 async def get_key(key: str, redis=Depends(get_redis)):
     value = await redis.get(key)
-    print(f"{key}:{value}")
     return ResponseBaseModel(data={key: value})
 

@@ -5,7 +5,12 @@ import time
 from fastapi import Response
 from loguru import logger as xlogger
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp
+from starlette.types import ASGIApp, Receive, Scope, Send
+from fastapi import Request, Depends
+
+
+class Receive:
+    pass
 
 
 class LogMiddleware(BaseHTTPMiddleware):
@@ -21,16 +26,11 @@ class LogMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
         cur_time = time.time()
-        xlogger.info(f"Request: {request.method} {request.url}")
+        xlogger.info(f"Request: {request.method} {request.url} {request.headers}")
         # xlogger.debug(f"Request Headers: {request.headers}")
-        # query_params = dict(request.query_params)
-        # xlogger.debug(f"Request query_params: {query_params}")
+        query_params = dict(request.query_params)
+        xlogger.debug(f"Request query_params: {query_params}")
 
-        if LogMiddleware.FILES_API in str(request.url):
-            print(f"File API")
-        # else:
-        #     body = await request.body()
-        #     xlogger.debug(f"Request Body: {body.decode('utf-8', 'ignore')}")
 
         response: Response = await call_next(request)
 
@@ -41,13 +41,18 @@ class LogMiddleware(BaseHTTPMiddleware):
         # response.body_iterator = iterate_in_threadpool(iter(response_body))
         # print(f"response_body={response_body[0].decode()}")
         delta_time = time.time() - cur_time
-        xlogger.info(f"total time cost: {delta_time}")
-        xlogger.info(f"Response status code: {response.status_code}")
-        xlogger.debug(f"Response headers: {response.headers}")
+
+        if delta_time > 0.3:
+            xlogger.error(f"total time cost: {delta_time}")
+        else:
+            xlogger.warning(f"total time cost: {delta_time}")
+
+        xlogger.info(f"Response status code: {response.status_code} Response headers: {response.headers}")
+
         response_body = b""
         async for chunk in response.body_iterator:
             response_body += chunk
-        xlogger.debug(f"Response Body: {response_body}")
+        xlogger.info(f"Response Body: {response_body}")
         return Response(content=response_body, status_code=response.status_code,
                         headers=dict(response.headers), media_type=response.media_type)
 
