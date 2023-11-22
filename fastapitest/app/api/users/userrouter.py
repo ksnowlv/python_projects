@@ -2,12 +2,10 @@ import http
 
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
-from starlette.exceptions import HTTPException
 
-from app.core.xlogger import xlogger
-from app.db.userdb import UserDbModel
-from app.db.userschemas import UserCreate, UserUpdate, UserResponse, UserVerificationCode
 from app.db.database import get_db
+from app.db.userdb import UserDbModel
+from app.db.userschemas import UserCreate, UserUpdate
 from app.utils.tokentools import *
 from .usermodel import USER_NOT_REGIST_MESSAGE
 from ..models.responsemodel import ResponseBaseModel
@@ -17,6 +15,7 @@ router = APIRouter(
     tags=["用户接口"],
     responses={404: {"description": "Not found111"}},
 )
+
 
 # @router.get('/home')
 # async def home():
@@ -42,13 +41,18 @@ async def regist(user: UserCreate, db: Session = Depends(get_db)):
         token = generate_token(userid)
 
         try:
-            resUser = user_dbmodel.create_user(userid=userid, name=user.name, age=user.age, phone=user.phone, verification_code=user.verification_code, token=token)
+            res_user = user_dbmodel.create_user(userid=userid,
+                                                name=user.name,
+                                                age=user.age,
+                                                phone=user.phone,
+                                                verification_code=user.verification_code,
+                                                token=token)
 
             response_data = {
                 "registResult": 1,
-                "userid": resUser.userid,
-                "token": resUser.token
-             }
+                "userid": res_user.userid,
+                "token": res_user.token
+            }
             return ResponseBaseModel(data=response_data)
         except Exception as e:
             print(f"发生了未知错误:{str(e)}")
@@ -61,6 +65,7 @@ async def regist(user: UserCreate, db: Session = Depends(get_db)):
                                      message="请求失败",
                                      data=response_data)
 
+
 @router.post("/login", response_model=ResponseBaseModel)
 async def login(user: UserCreate, db: Session = Depends(get_db)):
     user_dbmodel = UserDbModel(db)
@@ -68,10 +73,10 @@ async def login(user: UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         if existing_user.verification_code == user.verification_code:
             token = generate_token(existing_user.userid)
-            resUser = user_dbmodel.update_user_token(existing_user, token)
+            res_user = user_dbmodel.update_user_token(existing_user, token)
             response_data = {
-                "userid": resUser.userid,
-                "token": resUser.token
+                "userid": res_user.userid,
+                "token": res_user.token
             }
             return ResponseBaseModel(data=response_data)
         else:
@@ -79,6 +84,7 @@ async def login(user: UserCreate, db: Session = Depends(get_db)):
 
     else:
         return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message=USER_NOT_REGIST_MESSAGE)
+
 
 @router.post("/getSMSCode", response_model=ResponseBaseModel)
 async def get_sms_code(phone: str, db: Session = Depends(get_db)):
@@ -96,9 +102,9 @@ async def get_sms_code(phone: str, db: Session = Depends(get_db)):
     else:
         return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message=USER_NOT_REGIST_MESSAGE)
 
+
 @router.put("/updateUser", response_model=ResponseBaseModel)
 async def update_user(token: str, user: UserUpdate, db: Session = Depends(get_db)):
-
     if user.verification_code is None:
         return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message="验证码不能为空!")
 
@@ -134,4 +140,3 @@ async def delete_user(token: str, db: Session = Depends(get_db)):
         return ResponseBaseModel(message="用户已注销!")
     else:
         return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message="用户查询不到，注销失败!")
-

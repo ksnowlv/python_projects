@@ -1,18 +1,12 @@
 from app.api.models.responsemodel import ResponseModel
 
-
-
-
 USER_NOT_REGIST_MESSAGE = "该用户账号未注册，请先去注册!"
+
 
 class UserRegistResponseModel(ResponseModel):
     def __init__(self, userId: str, token: str, code: int = 200, message: str = "成功"):
         data = {"userId": userId, "token": token}
         super().__init__(data, code, message)
-
-
-
-
 
 # class TokenResponseModel(BaseModel):
 #     token: str
