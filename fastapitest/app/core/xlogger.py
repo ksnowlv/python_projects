@@ -5,12 +5,7 @@ import time
 from fastapi import Response
 from loguru import logger as xlogger
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp, Receive, Scope, Send
-from fastapi import Request, Depends
-
-
-class Receive:
-    pass
+from starlette.types import ASGIApp
 
 
 class LogMiddleware(BaseHTTPMiddleware):
@@ -24,13 +19,18 @@ class LogMiddleware(BaseHTTPMiddleware):
         # 配置 loguru 日志记录器
         xlogger.add("app.log", rotation="500 MB", compression="zip", format="{time} {level} {message}")
 
+    # async def before_request(self, request: Request) -> Optional[Request]:
+    #         # 如果请求是一个断点续传的 GET 请求，则返回 None，不进行处理
+    #     if "Range" in request.headers and request.method == "GET":
+    #         return None
+    #     return request
+
     async def dispatch(self, request, call_next):
         cur_time = time.time()
         xlogger.info(f"Request: {request.method} {request.url} {request.headers}")
         # xlogger.debug(f"Request Headers: {request.headers}")
         query_params = dict(request.query_params)
         xlogger.debug(f"Request query_params: {query_params}")
-
 
         response: Response = await call_next(request)
 

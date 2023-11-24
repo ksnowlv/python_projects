@@ -1,4 +1,3 @@
-
 import uvicorn
 from fastapi import FastAPI
 from app.core import config
@@ -8,8 +7,8 @@ from app.db.database import *
 from app.core.xredis import init_redis, close_redis
 from app.db.xgridfs import XGridFS
 
-def create_app():
 
+def create_app():
     app = FastAPI(title=config.PROJECT_NAME, debug=config.DEBUG, version=config.VERSION)
     init_middleware(app)
     init_db()
@@ -18,6 +17,7 @@ def create_app():
 
 
 app = create_app()
+
 
 @app.on_event("startup")
 async def startup():
@@ -28,6 +28,7 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await close_redis()
+
 
 # @app.middleware("http")
 # async def log_requests(request: Request, call_next):
@@ -69,8 +70,6 @@ async def shutdown():
 #     )
 #
 #     return new_response
-
-
 
 
 # main

@@ -1,13 +1,15 @@
 import http
+import io
 import urllib
 
-from fastapi import APIRouter, File, UploadFile, Response
-from fastapi.responses import FileResponse
+import bson
+from fastapi import APIRouter, UploadFile, Request
 from starlette.responses import Response
 from starlette.responses import StreamingResponse
-import io
+
+from ..models.responsemodel import ResponseBaseModel, ResponseNotFoundModel
+from ...core.xlogger import xlogger
 from ...db.xgridfs import XGridFS
-from ..models.responsemodel import ResponseBaseModel
 from ...utils.md5utils import md5_by_data
 
 router = APIRouter(
@@ -15,7 +17,6 @@ router = APIRouter(
     tags=["文件操作接口"],
     responses={404: {"description": "Not found"}},
 )
-
 
 """
 curl -X POST http://localhost:8081/create_file/upload \
@@ -29,7 +30,7 @@ curl -X POST http://localhost:8081/file/upload_file_1 \
 
 
 @router.post("/uploadFile", response_model=ResponseBaseModel)
-async def upload_file(file: UploadFile=None):
+async def upload_file(file: UploadFile = None):
     if not file:
         return ResponseBaseModel(code=http.HTTPStatus.NOT_ACCEPTABLE, message=f"文件为空，上传失败", data={
             "file_id": 0,
@@ -58,8 +59,8 @@ async def upload_file(file: UploadFile=None):
         })
 
     return ResponseBaseModel(message=f"文件{file.filename}上传成功", data={
-            "file_id": str(file_id),
-        })
+        "file_id": str(file_id),
+    })
 
 
 """
@@ -75,6 +76,7 @@ async def upload_file(file: UploadFile=None):
           -F "upload[]=@/Users/ksnowlv/Documents/3.txt" \
           -H "Content-Type: multipart/form-data"
 """
+
 
 @router.post("/uploadMultipleFiles", response_model=ResponseBaseModel)
 async def upload_multiple_files(files: list[UploadFile] = None):
@@ -92,6 +94,19 @@ async def upload_multiple_files(files: list[UploadFile] = None):
         return ResponseBaseModel(data={"files": upload_files})
     else:
         return ResponseBaseModel(message="您没有上传任何文件!", data={"files": upload_files})
+
+
+"""
+curl -o output.file -r 2000-5000 http://127.0.0.1:8081/file/downloadFile/655d97c659b1196d5e0cc7e8
+
+curl -o output.file -r -9000 http://127.0.0.1:8081/file/downloadFile/655d97c659b1196d5e0cc7e8
+
+curl -o output.file -r 9000- http://127.0.0.1:8081/file/downloadFile/655d97c659b1196d5e0cc7e8
+
+curl -o output.file  http://127.0.0.1:8081/file/downloadFile/655d97c659b1196d5e0cc7e8
+
+"""
+
 
 @router.get("/fileId/{file_id}")
 async def get_file_content(file_id: str, response: Response):
@@ -114,3 +129,93 @@ async def get_file_content(file_id: str, response: Response):
     except:
         return ResponseBaseModel(code=http.HTTPStatus.SERVICE_UNAVAILABLE, message="存储服务异常")
 
+
+# http://127.0.0.1:8081/file/downloadFile/655d97c659b1196d5e0cc7e8
+
+@router.get("/downloadFile/{file_id}")
+async def download_file(file_id: str, request: Request):
+    file = XGridFS.shared_gridfs().find_one({"_id": bson.objectid.ObjectId(file_id)})
+    if not file:
+        return ResponseNotFoundModel()
+
+    total_file_size = file.length
+    range_header = request.headers.get("range")
+    content_length = chunk_size = total_file_size
+    offset = 0
+    encoded_filename = urllib.parse.quote(file.filename)
+
+    res_headers = {
+        'content-disposition': f'attachment; filename="{encoded_filename}"',
+        'accept-ranges': 'bytes',
+        'connection': 'keep-alive',
+        'content-length': str(content_length),
+        # 'last-modified': time,
+    }
+    file_range = None
+
+    if range_header:
+        xlogger.info(f"range_header:{range_header}")
+        file_range = parse_range_header(range_header, total_file_size)
+
+        if file_range and not file_range.is_valid(total_file_size):
+            return ResponseNotFoundModel(message="超出文件范围")
+
+        res_headers.update({'content-range': file_range.content_range(total_file_size)})
+        if file_range:
+            offset = file_range.start
+            content_length = chunk_size = file_range.stop - file_range.start
+            res_headers.update({'content-length': str(content_length)})
+
+    file.seek(offset)
+    res_data = file.read(chunk_size)
+
+    xlogger.info(f"res headers= {res_headers}")
+
+    return Response(res_data,
+                    status_code=206 if file_range and file_range.is_valid(content_length) else 200,
+                    media_type='application/octet-stream',
+                    headers=res_headers)
+    # 使用Response或下面的StreamingResponse
+    file_stream = io.BytesIO(res_data)
+    return StreamingResponse(
+        file_stream,
+        status_code=206 if file_range and file_range.is_valid(content_length) else 200,
+        media_type='application/octet-stream',
+        headers=res_headers
+    )
+
+
+class XRange:
+    def __init__(self, start=None, stop=None):
+        self.start = start
+        self.stop = stop
+
+    def content_range(self, file_size):
+        # Content-Range：bytes 2400-3599/5000
+        if self.start is None:
+            return f"bytes */{file_size}"
+        elif self.stop is None:
+            return f"bytes {self.start}-/{file_size}"
+        else:
+            return f"bytes {self.start}-{self.stop - 1}/{file_size}"
+
+    def is_valid(self, length):
+        if self.start is None:
+            self.start = length - self.stop
+            self.stop = length
+        elif self.stop is None or self.stop > length:
+            self.stop = length
+        return 0 <= self.start < self.stop
+
+
+def parse_range_header(range_header, length):
+    if range_header is None:
+        return None
+    range_parts = range_header.split("=")[1].split("-")
+    start, stop = [int(x) if x else None for x in range_parts]
+
+    if start is not None and start >= length:
+        return None
+    if stop is not None and stop >= length:
+        stop = length - 1
+    return XRange(start, stop)

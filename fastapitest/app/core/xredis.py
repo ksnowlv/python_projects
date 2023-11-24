@@ -6,6 +6,7 @@ from redis import Redis
 
 redis: Redis = None
 
+
 async def init_redis():
     global redis
     redis = await aioredis.from_url(REDIS_URL)
@@ -18,9 +19,11 @@ async def get_redis():
         await init_redis()
     return redis
 
+
 async def close_redis():
     global redis
     await redis.close()
+
 
 def convert_ttl_to_seconds(ttl: str) -> int:
     ttl = ttl.lower()
@@ -49,4 +52,4 @@ def convert_ttl_to_seconds(ttl: str) -> int:
 # 以星期为单位：例如 "2w" 表示两周的过期时间。
 # 以天为单位：例如 "3d" 表示三天的过期时间。
 
-REDIS_EXPIRATION_TIME=convert_ttl_to_seconds('1d')
+REDIS_EXPIRATION_TIME = convert_ttl_to_seconds('1d')

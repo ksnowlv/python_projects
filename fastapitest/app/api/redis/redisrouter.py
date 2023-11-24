@@ -1,6 +1,6 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter, Depends
 from typing import Any
-from app.core.xredis import  get_redis
+from app.core.xredis import get_redis
 import json
 from ..models.responsemodel import ResponseBaseModel
 
@@ -10,8 +10,9 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+
 @router.post('/setKeyValue', response_model=ResponseBaseModel)
-async def set_key_value(key:str, value:Any, redis=Depends(get_redis)):
+async def set_key_value(key: str, value: Any, redis=Depends(get_redis)):
     await redis.set(key, value)
     value = await redis.get(key)
     print(f"{key}:{value}")
@@ -28,6 +29,7 @@ async def set_keys_values(pairs: dict, redis=Depends(get_redis)):
 
     return ResponseBaseModel(data=pairs)
 
+
 @router.post('/setJsonKeyValues')
 async def set_json_key_values(key: str, value: dict, redis=Depends(get_redis)):
     json_data = json.dumps(value)  # 将字典转换为 JSON 字符串
@@ -36,8 +38,8 @@ async def set_json_key_values(key: str, value: dict, redis=Depends(get_redis)):
     json_obj = json.loads(res_value)
     return ResponseBaseModel(data={key: json_obj})
 
+
 @router.post('/getKey')
 async def get_key(key: str, redis=Depends(get_redis)):
     value = await redis.get(key)
     return ResponseBaseModel(data={key: value})
-

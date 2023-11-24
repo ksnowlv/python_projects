@@ -16,7 +16,9 @@ class ResponseBaseModel(BaseModel):
     message: str = Field('请求成功', description="请求状态描述")
     data: Dict[str, object] = Field(None, description="User data, if any")
 
-# class ResponseModel(BaseModel):
-#     code: int = 200
-#     message: str = "成功"
-#     data: Dict
+
+class ResponseNotFoundModel(BaseModel):
+    code: int = Field(http.HTTPStatus.NOT_FOUND, description="请求状态码")
+    message: str = Field('找不到', description="请求状态描述")
+    data: Dict[str, object] = Field(None, description="User data, if any")
+
