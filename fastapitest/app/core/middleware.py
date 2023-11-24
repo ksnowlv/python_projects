@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.core.xlogger import LogMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 def init_middleware(app: FastAPI):
     app.add_middleware(LogMiddleware)
@@ -17,4 +18,8 @@ def init_middleware(app: FastAPI):
     # 开启gzip压缩
     # 当请求的头信息 Accept-Encoding 字段带有"gzip"时，GZipMiddleware负责完成相应的返回结果处理。
     # GZipMiddleware 支持 minimum_size 参数：当返回结果大小小于指定值时不启用压缩。(单位为字节，默认值为500)
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
+    # Accept-Encoding: gzip
+    app.add_middleware(GZipMiddleware, minimum_size=100)
+    #强制开启https
+    #app.add_middleware(HTTPSRedirectMiddleware)
+
