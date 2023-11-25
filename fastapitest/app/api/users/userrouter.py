@@ -83,7 +83,8 @@ async def login(user: UserCreate, db: Session = Depends(get_db)):
             return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message="手机验证码错误，请检查后再试")
 
     else:
-        return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message=USER_NOT_REGIST_MESSAGE)
+        return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message=USER_NOT_REGIST_MESSAGE, data={ "userid": "",
+                "token": "", "gzip":"test gzip 1dkkdkkddkdkdkddkdkdkdkddkkkkkkkklds;'sa;lsl;skfa00000000000011111111"})
 
 
 @router.post("/getSMSCode", response_model=ResponseBaseModel)
