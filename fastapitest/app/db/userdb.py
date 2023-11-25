@@ -8,12 +8,12 @@ class UserDB(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    userid = Column(String(64), primary_key=True, index=True)
-    name = Column(String(50), index=True)
-    age = Column(Integer)
-    phone = Column(String(20), index=True)
-    verification_code = Column(String(6))
-    token = Column(String(256), index=True, unique=True)
+    userid = Column(String(64), primary_key=True, index=True, comment='用户userId')
+    name = Column(String(50), index=True, comment='用户姓名')
+    age = Column(Integer, comment='用户年龄')
+    phone = Column(String(20), index=True,comment="手机号")
+    verification_code = Column(String(6), comment="验证码")
+    token = Column(String(256), index=True, unique=True, comment="用户惟一token")
 
 
 class UserDbModel:
