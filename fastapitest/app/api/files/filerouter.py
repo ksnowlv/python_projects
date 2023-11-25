@@ -3,12 +3,13 @@ import io
 import urllib
 
 import bson
-from fastapi import APIRouter, UploadFile, Request
+from fastapi import APIRouter, UploadFile, Request, File
 from starlette.responses import Response
 from starlette.responses import StreamingResponse
 
 from ..models.responsemodel import ResponseBaseModel, ResponseNotFoundModel
 from ...core.xlogger import xlogger
+from ...core.xfastdfs import XFastDFS
 from ...db.xgridfs import XGridFS
 from ...utils.md5utils import md5_by_data
 
@@ -125,7 +126,6 @@ async def get_file_content(file_id: str, response: Response):
             # return StreamingResponse(file_stream, media_type='application/octet-stream', headers=response.headers)
         else:
             return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message=f"找不到文件{file_id}")
-
     except:
         return ResponseBaseModel(code=http.HTTPStatus.SERVICE_UNAVAILABLE, message="存储服务异常")
 
@@ -219,3 +219,45 @@ def parse_range_header(range_header, length):
     if stop is not None and stop >= length:
         stop = length - 1
     return XRange(start, stop)
+
+
+@router.post("/uploadFileWithFastDFS", response_model=ResponseBaseModel)
+async def upload_file_fast_dfs(file: UploadFile = File(...)):
+    if not file:
+        return ResponseBaseModel(code=http.HTTPStatus.NOT_ACCEPTABLE, message=f"文件为空，上传失败", data={
+            "file_id": 0,
+        })
+
+    file_info = XFastDFS.fast_dfs().upload_by_buffer(file.read(), file.filename)
+    # 如果文件存在，则返回文件id；如果不存在，则写入GridFS
+
+    if file_info:
+        return ResponseBaseModel(message=f"文件{file.filename}上传成功", data={
+            "file_id": str(file_info['Remote file_id'])})
+
+    return ResponseBaseModel(message=f"文件{file.filename}上传失败", data={
+            "file_id": 0,
+        })
+
+
+@router.get("/fileIdByFastFDS/{file_id}")
+async def get_file_contentByFastFDS(file_id: str, response: Response):
+    try:
+        file_info = XFastDFS.fast_dfs().get_meta_data(file_id)
+
+        if file_info:
+            # 解决文件名称为中文的情况
+            encoded_filename = urllib.parse.quote(file_info.filename)
+            response.headers["Content-Disposition"] = f'attachment; filename="{encoded_filename}"'
+
+            return Response(file_info.content, media_type='application/octet-stream', headers=response.headers)
+
+            # 返回上述Response或下面StreamingResponse都可以
+            # file_stream = io.BytesIO(content)
+            # return StreamingResponse(file_stream, media_type='application/octet-stream', headers=response.headers)
+        else:
+            return ResponseBaseModel(code=http.HTTPStatus.NOT_FOUND, message=f"找不到文件{file_id}")
+    except:
+        return ResponseBaseModel(code=http.HTTPStatus.SERVICE_UNAVAILABLE, message="存储服务异常")
+
+
