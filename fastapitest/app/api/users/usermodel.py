@@ -1,6 +1,6 @@
 from app.api.models.responsemodel import ResponseModel
 
-USER_NOT_REGIST_MESSAGE = "该用户账号未注册，请先去注册!"
+USER_NOT_REGIST_MESSAGE = "该用户未注册账号，请先去注册账号，谢谢"
 
 
 class UserRegistResponseModel(ResponseModel):
