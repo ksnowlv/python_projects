@@ -1,7 +1,7 @@
-
 from fdfs_client.client import *
 
 g_fast_dfs = None
+
 
 class XFastDFS(object):
 

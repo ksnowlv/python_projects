@@ -6,6 +6,8 @@ from app.api import init_routers
 from app.db.database import *
 from app.core.xredis import init_redis, close_redis
 from app.db.xgridfs import XGridFS
+from app.core.xfastdfs import XFastDFS
+from app.core.xhdfs import XHDFS
 
 
 def create_app():
@@ -23,6 +25,8 @@ app = create_app()
 async def startup():
     await init_redis()
     XGridFS.shared_gridfs()
+    XFastDFS.fast_dfs()
+    XHDFS.hdfs()
 
 
 @app.on_event("shutdown")

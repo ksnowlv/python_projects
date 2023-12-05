@@ -50,3 +50,5 @@ fastapitest/.idea
 fastapitest/__pycache__
 fastapitest/app/api/__pycache__
 fastapitest/app/api/routers/__pycache__
+beautifulsouptest/.idea
+fastapitest/app/db/__pycache__
