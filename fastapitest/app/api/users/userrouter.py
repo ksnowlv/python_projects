@@ -17,11 +17,10 @@ router = APIRouter(
 )
 
 
-# @router.get('/home')
-# async def home():
-#     # return {'message': "Hello user"}
-#     xlogger.info("home:")
-#     return  {'message': "test-----"}
+@router.get('/home')
+async def home():
+    # return {'message': "Hello user"}
+    return  {'message': "hello fastapitest"}
 
 @router.post("/regist", response_model=ResponseBaseModel)
 async def regist(user: UserCreate, db: Session = Depends(get_db)):

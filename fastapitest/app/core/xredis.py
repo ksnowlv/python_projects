@@ -1,15 +1,14 @@
 from redis import asyncio as aioredis
 from datetime import datetime, timedelta
 
-from .config import REDIS_URL
 from redis import Redis
 
 redis: Redis = None
 
 
-async def init_redis():
+async def init_redis(redis_url):
     global redis
-    redis = await aioredis.from_url(REDIS_URL)
+    redis = await aioredis.from_url(redis_url)
     print(f"redis = {redis}")
 
 

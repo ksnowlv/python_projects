@@ -1,0 +1,21 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:111111@db:3306/mydatabase
+    command: sh -c 'while ! mysqladmin ping -h db --silent; do sleep 1; done && uvicorn main:app --host 0.0.0.0 --port 8000'
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=111111
+      - MYSQL_DATABASE=mydatabase
+    volumes:
+      - ./data:/var/lib/mysql
+    ports:
+      - "3307:3306"

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from app.db.database import Base
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from typing import Optional
 
