@@ -52,3 +52,6 @@ fastapitest/app/api/__pycache__
 fastapitest/app/api/routers/__pycache__
 beautifulsouptest/.idea
 fastapitest/app/db/__pycache__
+fastapitest/app/api/models/__pycache__
+fastapitest/app/api/kafka/__pycache__
+libcurltest/.idea
