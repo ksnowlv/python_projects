@@ -55,3 +55,6 @@ fastapitest/app/db/__pycache__
 fastapitest/app/api/models/__pycache__
 fastapitest/app/api/kafka/__pycache__
 libcurltest/.idea
+fastapitest/.run
+fastapitest/app/__pycache__
+fastapitest/app/utils/__pycache__
